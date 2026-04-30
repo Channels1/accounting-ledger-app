@@ -1,15 +1,19 @@
 package com.pluralsight;
 
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 public class accountingApp {
-    private int date;
-    private int time;
+    private LocalDate date;
+    private LocalTime time;
     private String description, vendor;
     private double amount;
 
     // constructor
-    public accountingApp(int date, int time, String description, String vendor, double amount) {
-        this.date = date;
-        this.time = time;
+    public accountingApp() {
+        this.date = null;
+        this.time = null;
         this.description = description;
         this.vendor = vendor;
         this.amount = amount;
@@ -17,19 +21,21 @@ public class accountingApp {
     }
 
     // Getters ans Setters
-    public int getDate() {
+
+
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(int date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public int getTime() {
+    public LocalTime getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(LocalTime time) {
         this.time = time;
     }
 
@@ -56,6 +62,4 @@ public class accountingApp {
     public void setAmount(double amount) {
         this.amount = amount;
     }
-
-
 }

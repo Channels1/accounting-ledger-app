@@ -1,7 +1,13 @@
 package com.pluralsight;
 
 import java.io.*;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class Main {
     public static void main(String[] args) {
@@ -9,6 +15,7 @@ public class Main {
         Scanner uKey = new Scanner(System.in);
        System.out.println("Home screen test welcome");
         homeScreen(uKey);
+
     }
     //initialization of the Ledger
     public static void displayLedger() {
@@ -29,6 +36,58 @@ public class Main {
 
     }
 
+    public static void LedgerList() {
+
+            try {
+                BufferedReader br = new BufferedReader(new FileReader("Transactions.csv"));
+                //This creates a new instance of a list
+                //The hashmap is a container is the dataType! Sting, int, double, boolean, Class
+                ArrayList<accountingApp> list = new ArrayList<>();
+                String line;
+                //This tells the date what to parse into! Then it will convert the date into a string!
+
+
+                while ((line = br.readLine())!= null) {
+                //We need to create an object to add to the list!
+                    //Accounting app has all of our data! Therefore we need to call on it to create a new instance
+                    accountingApp loadList = new accountingApp();
+                    String[] tempArray = line.split(Pattern.quote("|"));
+                    //
+                    try {
+                        //This turns the string into a double!
+                        LocalDate dateTemp = LocalDate.parse(tempArray[0]);
+                        LocalTime timeTemp = LocalTime.parse(tempArray[1]);
+                        String tempDescription = tempArray[2];
+                        String tempVendor = tempArray[3];
+                        double amountTemp = Double.parseDouble(tempArray[4]);
+
+                        //This sets the double into our object!
+                        loadList.setDate(dateTemp);
+                        loadList.setTime(timeTemp);
+                        loadList.setDescription(tempDescription);
+                        loadList.setVendor(tempVendor);
+                        loadList.setAmount(amountTemp);
+
+                        //This permanately adds our instance into the list we made earlier
+                        list.add(loadList);
+                    }
+                    catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+
+            } catch (FileNotFoundException e) {
+                System.out.println("file not found");
+                e.printStackTrace();
+
+            } catch (IOException e) {
+                System.out.println("Something went wrong");
+            }
+
+
+    }
     public static void homeScreen(Scanner uKey){
 
         boolean run = true;
@@ -39,12 +98,13 @@ public class Main {
             System.out.println("\t2 Make payment(debit)");
             System.out.println("\t3 Ledger page");
             System.out.println("\t0 Exit");
+            System.out.print("Make a selection ");
             int choice = uKey.nextInt();
             uKey.nextLine();
 
             switch (choice) {
                 case 1:
-                    //addDeposit
+                    addDeposit();
                     break;
                 case 2:
                     paymentDebit(uKey);
@@ -65,14 +125,52 @@ public class Main {
 
     }
 
+
     public static void ledgerScreen (Scanner uKey) {
         System.out.println("Ledger page");
-        uKey.nextLine();
         boolean run = true;
+        formattedSpace();
         while (run) {
-            System.out.println("");
+            System.out.println("\t(1) Display all");
+            System.out.println("\t(2) Show deposits");
+            System.out.println("\t(3) Show payments");
+            System.out.println("\t(4) Show reports");
+            System.out.println("\t(0) back to homepage");
+
+            System.out.print("Please select your option ");
+            int choice = uKey.nextInt();
+
+            switch (choice) {
+                case 1:
+                    displayLedger();
+                    break;
+                case 2:
+                    depositEntry();
+                    break;
+                case 3:
+                    paymentDisplayLedger();
+                    paymentEntry();
+                    break;
+                case 4:
+                    reports();
+                    break;
+                case 0:
+                    homeScreen(uKey);
+                    break;
+                default:
+                    waitAndGo(uKey,"invalid inout try again");
+
+            }
+
+
         }
 
+
+
+    }
+
+    public static void addDeposit() {
+        LedgerList();
 
     }
 
@@ -81,6 +179,7 @@ public class Main {
     }
     //positive balances
     public static void depositEntry() {
+        LedgerList();
 
     }
 
