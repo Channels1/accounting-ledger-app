@@ -1,7 +1,6 @@
 package com.pluralsight;
 
 import java.io.*;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +14,7 @@ public class Main {
         Scanner uKey = new Scanner(System.in);
        System.out.println("Home screen test welcome");
         homeScreen(uKey);
+
 
     }
     //initialization of the Ledger
@@ -104,7 +104,7 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    addDeposit();
+                    addDeposit(uKey);
                     break;
                 case 2:
                     paymentDebit(uKey);
@@ -145,14 +145,13 @@ public class Main {
                     displayLedger();
                     break;
                 case 2:
-                    depositEntry();
+                    depositDisplay();
                     break;
                 case 3:
-                    paymentDisplayLedger();
-                    paymentEntry();
+                    paymentDisplay();
                     break;
                 case 4:
-                    reports();
+                    reports(uKey);
                     break;
                 case 0:
                     homeScreen(uKey);
@@ -169,26 +168,231 @@ public class Main {
 
     }
 
-    public static void addDeposit() {
-        LedgerList();
+    public static void addDeposit(Scanner uKey) {
+        System.out.print("Enter the description?: ");
+        String description = uKey.nextLine().trim();
+        System.out.print("Who is the vendor?: ");
+        String vendor = uKey.nextLine().trim();
+        System.out.println("what is the amount? ");
+        double amount = uKey.nextDouble();
+
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateConverter = formatter.format(date);
+
+        LocalTime time = LocalTime.now();
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm:ss");
+        String timeConverter = timeFormatter.format(time);
+
+
+        try {
+            BufferedWriter bufWriter = new BufferedWriter(new FileWriter("src/main/resources/Transactions.csv",true));
+            bufWriter.write( String.format("%s|%s|%s|%s|%.2f\n",dateConverter,timeConverter,description,vendor,amount));
+            bufWriter.newLine();
+            bufWriter.close();
+
+        } catch (IOException e) {
+            System.out.println("Something went wrong");
+
+        }
 
     }
 
     public static void paymentDebit(Scanner uKey) {
+        System.out.print("Enter the description?: ");
+        String description = uKey.nextLine().trim();
+        System.out.print("Who is the vendor?: ");
+        String vendor = uKey.nextLine().trim();
+        System.out.println("what is the amount? ");
+        double amount = uKey.nextDouble();
+
+        LocalDate date = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateConverter = formatter.format(date);
+
+        LocalTime time = LocalTime.now();
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm:ss");
+        String timeConverter = timeFormatter.format(time);
+
+
+
+        try {
+            BufferedWriter bufWriter = new BufferedWriter(new FileWriter("src/main/resources/Transactions.csv",true));
+            bufWriter.write( String.format("%s|%s|%s|%s|%.2f\n",dateConverter,timeConverter,description,vendor,amount));
+            bufWriter.newLine();
+            bufWriter.close();
+
+        } catch (IOException e) {
+            System.out.println("Something went wrong");
+
+        }
 
     }
     //positive balances
-    public static void depositEntry() {
-        LedgerList();
+    public static void depositDisplay() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("src/main/resources/Transactions.csv"));
+            String data;
+            while((data = bufReader.readLine())!= null) {
+                String[] tempArray = data.split(Pattern.quote("|"));
+                if(!tempArray[4].contains("-")) {
+                    System.out.println(data);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+
+        } catch (IOException e) {
+            System.out.println("An error has occurred");
+
+        }
+
 
     }
 
     //Negative balances
-    public static void paymentEntry() {
+    public static void paymentDisplay() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("src/main/resources/Transactions.csv"));
+            String data;
+            while((data = bufReader.readLine())!= null) {
+                String[] tempArray = data.split(Pattern.quote("|"));
+                if(tempArray[4].contains("-")) {
+                    System.out.println(data);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+
+        } catch (IOException e) {
+            System.out.println("An error has occurred");
+
+        }
+
+    }
+    public static void reports(Scanner uKey) {
+        System.out.println("What are you looking for specifically?");
+        System.out.println("\t(1) Month to date");
+        System.out.println("\t(2) Previous month");
+        System.out.println("\t(3) Year To Date");
+        System.out.println("\t(4) Previous year");
+        System.out.println("\t(5) Search by Vendor");
+        System.out.println("\t(6) Back to ledger selection");
+        System.out.println("\t(0) Back to homepage");
+        int choice = uKey.nextInt();
+
+        boolean run = true;
+
+        switch (choice) {
+            case 1:
+                searchMonthToDate(uKey);
+                break;
+            case 2:
+                //Previous month
+                break;
+            case 3:
+                yearToDate(uKey);
+                break;
+            case 4:
+                //Previous Year
+            case 5:
+                vendorSearch();
+                break;
+            case 6:
+                ledgerScreen(uKey);
+                break;
+            case 0:
+                homeScreen(uKey);
+                break;
+            default:
+                System.out.println("Wrong input");
+
+        }
+
 
     }
 
-    public static void reports() {
+    public static void searchMonthToDate(Scanner ukey) {
+        System.out.println("What is the month(1-12)?: ");
+        int month = ukey.nextInt();
+        System.out.println("What is the day(1-31)?: ");
+        int day = ukey.nextInt();
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate startMtD = currentDate.withMonth(month).withDayOfMonth(day);
+
+
+
+            try {
+                BufferedReader br = new BufferedReader(new FileReader("src/main/resources/Transactions.csv"));
+
+                String line;
+
+                while ((line = br.readLine())!= null) {
+                    if (line.trim().isEmpty()) continue;
+                    String[] tempArray = line.split(Pattern.quote("|"));
+                    LocalDate date = LocalDate.parse(tempArray[0]);
+                    LocalTime timeTemp = LocalTime.parse(tempArray[1]);
+                    String Description = tempArray[2];
+                    String Vendor = tempArray[3];
+                    double amount = Double.parseDouble(tempArray[4]);
+
+                    if(!date.isBefore(startMtD) && (!date.isAfter(currentDate))) {
+                        System.out.println(line);
+
+                    }
+                }
+
+            }  catch (FileNotFoundException e) {
+                System.out.println("File not found");
+
+            } catch (IOException e) {
+                System.out.println("Something went wrong");
+            }
+
+    }
+    public static void yearToDate(Scanner ukey) {
+        System.out.println("What is the year?: ");
+        int year = ukey.nextInt();
+        System.out.println("What is the month(1-12)?: ");
+        int month = ukey.nextInt();
+
+        LocalDate currentDate = LocalDate.now();
+        LocalDate startYtM = currentDate.withYear(year).withMonth(month);
+
+
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("src/main/resources/Transactions.csv"));
+
+            String line;
+
+            while ((line = br.readLine())!= null) {
+                if (line.trim().isEmpty()) continue;
+                String[] tempArray = line.split(Pattern.quote("|"));
+                LocalDate date = LocalDate.parse(tempArray[0]);
+                LocalTime timeTemp = LocalTime.parse(tempArray[1]);
+                String Description = tempArray[2];
+                String Vendor = tempArray[3];
+                double amount = Double.parseDouble(tempArray[4]);
+
+                if(!date.isBefore(startYtM) && (!date.isAfter(currentDate))) {
+                    System.out.println(line);
+
+                }
+            }
+
+        }  catch (FileNotFoundException e) {
+            System.out.println("File not found");
+
+        } catch (IOException e) {
+            System.out.println("Something went wrong");
+        }
+
+
+    }
+
+    public static void vendorSearch() {
 
     }
 
